@@ -151,7 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shipPrefab: {fileID: 4888043080135949804, guid: 6d676d2f9377640e996f6eb271be4ec6,
     type: 3}
-  simulationCount: 50
+  simulationCount: 30
 --- !u!4 &118779235
 Transform:
   m_ObjectHideFlags: 0

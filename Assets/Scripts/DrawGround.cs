@@ -11,7 +11,7 @@ public class DrawGround : MonoBehaviour {
     public float lineWidth = 0.02f;
     [Range(0.01f, 1)]
     public float stepSize = .5f;
-    void Start() {
+    void Awake() {
         Vector2 bottomLeft = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, Camera.main.nearClipPlane));
         Vector2 bottomRight = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, Camera.main.nearClipPlane));
         bottomLeft.y += lineWidth / 2;
@@ -53,8 +53,8 @@ public class DrawGround : MonoBehaviour {
         float elevation = 5f;
         var combinedFrequencies = 1 * Mathf.PerlinNoise(freq1 * posX, freq1 * posY)
             + 0.5 * Mathf.PerlinNoise(freq2 * posX, freq2 * posY)
-            + 0.25 * Mathf.PerlinNoise(freq3 * posX, freq3 * posY)
-            + 0.125 * Mathf.PerlinNoise(freq2 * posX, freq2 * posY);
+            + 0.25 * Mathf.PerlinNoise(freq3 * posX, freq3 * posY);
+            // + 0.125 * Mathf.PerlinNoise(freq2 * posX, freq2 * posY);
         return Mathf.Pow((float)combinedFrequencies, elevation);
     }
 }

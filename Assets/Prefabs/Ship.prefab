@@ -68,9 +68,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shipBaseCollider: {fileID: 5778824709104158757}
   shipBodyCollider: {fileID: 531591279631236585}
-  isAiControlled: 1
-  shipFuel: 20
+  floorCollider: {fileID: 0}
   startPosition: {x: 0, y: 0}
+  isAlive: 1
+  landed: 0
+  distanceFromGround: 0
+  bestDistanceFromGround: 0
 --- !u!1 &4888043080168595645
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +169,7 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.01}
+  m_Offset: {x: 0, y: 0.025}
   serializedVersion: 2
   m_Radius: 0.078413926
 --- !u!60 &5778824709104158757

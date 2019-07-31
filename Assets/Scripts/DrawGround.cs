@@ -36,7 +36,8 @@ public class DrawGround : MonoBehaviour {
 
     void BuildLine(Vector2 startPos, Vector2 endPos) {
         var x = startPos.x;
-        var modifier = Random.Range(0f, 1f);
+        // var modifier = Random.Range(0f, 1f);
+        var modifier = .3f;
         while (x < endPos.x) {
             float noise = MixFrequencies(x, linePoints[0].y + modifier);
             Vector2 newPos = new Vector2(x, linePoints[0].y + noise);

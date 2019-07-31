@@ -22,14 +22,13 @@ public class Ship : MonoBehaviour {
     public bool isAlive = true;
     public bool landed = false;
     public float distanceFromGround;
-    public float bestDistanceFromGround;
     float maxDistanceFromGround;
     float startHorizontal, endHorizontal;
     float collisionSpeed = 0;
     bool outOfBounds = false;
     float landedTime = 0;
     void Awake() {
-        nn = new NeuralNet(5, 8, 8, 2);
+        nn = new NeuralNet(4, 8, 8, 2);
         rigidBody = GetComponent<Rigidbody2D>();
     }
     void Start() {
@@ -42,7 +41,6 @@ public class Ship : MonoBehaviour {
         startHorizontal = bottomLeft.x;
         endHorizontal = topRight.x;
         maxDistanceFromGround = camTopY - camBottomY;
-        bestDistanceFromGround = maxDistanceFromGround;
 
         floorCollider = GameObject.FindGameObjectWithTag("Ground").GetComponent<EdgeCollider2D>();
         rigidBody.gravityScale = rigidBody.gravityScale * moonGravityPercent; 
@@ -50,9 +48,6 @@ public class Ship : MonoBehaviour {
     void Update() {
         if (isAlive) {
             distanceFromGround = Vector2.Distance(transform.position, floorCollider.ClosestPoint(transform.position)); 
-            if (distanceFromGround < bestDistanceFromGround) {
-                bestDistanceFromGround = distanceFromGround;
-            }
         }
         if (landed) {
             landedTime += Time.deltaTime;
@@ -63,7 +58,7 @@ public class Ship : MonoBehaviour {
             rigidBody.AddForce(transform.up * speed * output[0]);
             shipFuel -= (.1f * output[0]);
             var angleMult = output[1] - .5f;
-            var newRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.eulerAngles.y, inclinationAngle * angleMult);
+            var newRotation = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, inclinationAngle * angleMult);
             transform.rotation = Quaternion.RotateTowards(this.transform.rotation, newRotation, Time.deltaTime * rotationSpeed);
             if (rigidBody.velocity.magnitude > maxSpeed) {
                 rigidBody.velocity = rigidBody.velocity.normalized * maxSpeed;
@@ -88,21 +83,19 @@ public class Ship : MonoBehaviour {
         var fuelInput = shipFuel / maxFuel; 
         var distanceFromGroundInput = distanceFromGround / maxDistanceFromGround;
         var horizontalPositionInput = (transform.position.x - startHorizontal) / (endHorizontal - startHorizontal); 
-        var inclinationInput = (transform.rotation.eulerAngles.z + inclinationAngle) / 100;
-        return nn.Activate(velocityInput, fuelInput, distanceFromGroundInput, horizontalPositionInput, inclinationInput);
+        return nn.Activate(velocityInput, fuelInput, distanceFromGroundInput, horizontalPositionInput);
     }
 
     public float GetScore() {
         var distanceScore = (maxDistanceFromGround - distanceFromGround) * 100 / maxDistanceFromGround;
-        var fuelScore = (maxFuel - shipFuel) * 100 / maxFuel;
-        var score = fuelScore + distanceScore + landedTime;
+        var score = shipFuel + distanceScore + landedTime;
         if (landed) {
             score += 1000;
         }
         if (outOfBounds) {
             score = (score - 1000) > 1 ? score - 1000 : 1;
         }
-        score = (score - collisionSpeed * 10) > 1 ? score - collisionSpeed * 10 : 1;
+        score = (score - collisionSpeed * 100) > 1 ? score - collisionSpeed * 100 : 1;
         return score;
     }
 
@@ -127,8 +120,8 @@ public class Ship : MonoBehaviour {
     }
 
     void OnCollisionEnter2D(Collision2D collision) {
+        collisionSpeed = collision.relativeVelocity.magnitude;
         if (collision.relativeVelocity.magnitude > maxVelocityForLanding || shipBodyCollider.IsTouching(collision.collider)) {
-            collisionSpeed = collision.relativeVelocity.magnitude;
             Die();
         }
         if (shipBaseCollider.IsTouching(collision.collider)) {

@@ -13,16 +13,21 @@ public class GeneticAlgorithm {
     GaDelegate updateFunction;
     EndConditionDelegate simulationEndCondition;
     float simulationTime = 0;
+    public bool shouldLoad = true;
     public GeneticAlgorithm(int populationSize, int geneSize) {
         if (populationSize % 2 != 0) Debug.LogError("Try to make it a pair value pls");
         this.geneSize = geneSize;
-        population = new Gene[populationSize];
-        for (int i = 0; i < populationSize; i++) {
-            var gene = new Gene(geneSize, i);
-            for (int j = 0; j < geneSize; j++) {
-                gene.values[j] = Random.Range(-1f, 1f);
+        if (shouldLoad) {
+            population = DataManager.LoadGeneData();
+        } else {
+            population = new Gene[populationSize];
+            for (int i = 0; i < populationSize; i++) {
+                var gene = new Gene(geneSize);
+                for (int j = 0; j < geneSize; j++) {
+                    gene.values[j] = Random.Range(-1f, 1f);
+                }
+                population[i] = gene;
             }
-            population[i] = gene;
         }
     }
     public delegate void GaDelegate(Gene[] genes);
@@ -39,9 +44,9 @@ public class GeneticAlgorithm {
     void Procreate() {
         int i = 2;
         var newPopulation = new Gene[population.Length];
-        var sortedPopulation = population.OrderBy(gene => gene.Score).Reverse().ToArray();
-        newPopulation[0] = new Gene(geneSize, 0);
-        newPopulation[1] = new Gene(geneSize, 1);
+        var sortedPopulation = population.OrderBy(gene => gene.score).Reverse().ToArray();
+        newPopulation[0] = new Gene(geneSize);
+        newPopulation[1] = new Gene(geneSize);
         sortedPopulation[0].values.CopyTo(newPopulation[0].values, 0);
         sortedPopulation[1].values.CopyTo(newPopulation[1].values, 0);
         while (i < newPopulation.Length) {
@@ -55,18 +60,18 @@ public class GeneticAlgorithm {
                 float[] fatherFirst = father.values.Take(rndSplitPoint).ToArray();
                 float[] fatherSecond = father.values.Skip(rndSplitPoint).ToArray();
 
-                newPopulation[i] = new Gene(geneSize, i);
+                newPopulation[i] = new Gene(geneSize);
                 motherFirst.CopyTo(newPopulation[i].values, 0);
                 fatherSecond.CopyTo(newPopulation[i].values, motherFirst.Length);
                 MutateGene(newPopulation[i]);
 
-                newPopulation[i + 1] = new Gene(geneSize, i + 1);
+                newPopulation[i + 1] = new Gene(geneSize);
                 fatherFirst.CopyTo(newPopulation[i + 1].values, 0);
                 motherSecond.CopyTo(newPopulation[i + 1].values, fatherFirst.Length);
                 MutateGene(newPopulation[i + 1]);
             } else {
-                newPopulation[i] = new Gene(geneSize, i);
-                newPopulation[i + 1] = new Gene(geneSize, i + 1);
+                newPopulation[i] = new Gene(geneSize);
+                newPopulation[i + 1] = new Gene(geneSize);
                 var mother = PickRandomGene();
                 var father = PickRandomGene();
                 mother.values.CopyTo(newPopulation[i].values, 0);
@@ -91,15 +96,15 @@ public class GeneticAlgorithm {
     }
 
     Gene PickRandomGene() {
-        var sortedPopulation = population.OrderBy(gene => gene.Score).Reverse().ToArray();
-        var totalScore = sortedPopulation.Sum(gene => gene.Score);
+        var sortedPopulation = population.OrderBy(gene => gene.score).Reverse().ToArray();
+        var totalScore = sortedPopulation.Sum(gene => gene.score);
         var rnd = Random.Range(0, totalScore);
         float sum = 0;
         foreach(Gene gene in sortedPopulation) {
-            if (rnd < sum + gene.Score) {
+            if (rnd < sum + gene.score) {
                 return gene;
             } else {
-                sum += gene.Score;
+                sum += gene.score;
             }
         }
         Debug.LogError("You did something wrong here");
@@ -125,6 +130,7 @@ public class GeneticAlgorithm {
         if (timer >= simulationTime || simulationEndCondition()) {
             timer = 0;
             this.simulationFunction(this.population);
+            DataManager.SaveGeneData(population);
             this.Procreate();
             this.updateFunction(this.population);
         }

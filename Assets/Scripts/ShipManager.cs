@@ -19,7 +19,7 @@ public class ShipManager : MonoBehaviour {
         }
     }
     void Start() {
-        var startPosition = new Vector2(Random.Range(0, 3), Random.Range(0, 3));
+        var startPosition = Vector2.zero;
         for (int i = 0; i < simulationCount; i++) {
             var newGameObj = Instantiate(shipPrefab, startPosition, Quaternion.identity);
             var newShip = newGameObj.GetComponent<Ship>();

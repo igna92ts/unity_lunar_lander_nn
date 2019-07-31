@@ -21,7 +21,7 @@ public class Ship : MonoBehaviour {
     public NeuralNet nn;
     public bool isAlive = true;
     public bool landed = false;
-    public float distanceFromGround;
+    float distanceFromGround;
     float maxDistanceFromGround;
     float startHorizontal, endHorizontal;
     float collisionSpeed = 0;
